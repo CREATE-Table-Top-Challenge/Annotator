@@ -1,25 +1,16 @@
-# Automated_Annotator
+# CREATE Challenge Annotator
 Make sure to install torch first. All the (satisfied) libraries should already be installed if you install the remaining libraries. 
 
-Libraries needed:  
-- torch (https://pytorch.org/get-started/locally/)
-- ultralytics 
-- torchvision (satisfied)
-- transformers  
+To install, follow the same steps for setting up the conda environment as instructed in the main challenge repository.  
+Then install the following libraries using pip:  
 - PyQt6
 - superqt
 - sklearn
-- opencv-python (satisfied)
-- PIL (satisfied)
-- yaml (satisfied)
-- numpy (satisfied)
-- pandas (satisfied)
 
-To run type command in console: python \<path to repo\>/Automated_Annotator.py  
+To run type command in console: python \<path to repo\>/CREATE_Challenge_Annotator.py  
 
 Commands:
 - n -> move to next image
 - p -> move to previous image
-- d -> remove image (only functional after all images have been labelled)
-- m -> cycle display modes (show all boxes, show active box only, hide all boxes)
-- Ctrl+e -> export bounding boxes to label file (only functional after all images have been labelled)
+- m -> cycle display modes for bounding boxes(show all boxes, show active box only, hide all boxes)
+- Ctrl+e -> export labels to label file
