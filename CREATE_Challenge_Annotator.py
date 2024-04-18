@@ -5,7 +5,6 @@ import numpy
 import cv2
 import pandas
 import math
-
 import yaml
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt,QPoint
@@ -368,10 +367,7 @@ class CREATE_Challenge_Annotator(QWidget):
                     next_idx = img_idxs[curr_idx]
                     pos_increase = 0
             self.currentImage = self.imageLabelFile["FileName"][next_idx]
-            if (next_idx -1) in self.imageLabelFile.index and self.imageLabelFile["Folder"][next_idx-1] == self.imageLabelFile["Folder"][next_idx] and self.imageLabelFile["Status"][next_idx-1]!= "Incomplete":
-                self.imageLabelFile["Bounding boxes"][next_idx] = self.smoothBBoxes(self.imageLabelFile["Bounding boxes"][next_idx],next_idx)
-            else:
-                self.imageLabelFile["Bounding boxes"][next_idx] = self.imageLabelFile["Bounding boxes"][next_idx]
+            self.imageLabelFile["Bounding boxes"][next_idx] = self.imageLabelFile["Bounding boxes"][next_idx]
             if self.imageLabelFile["Status"][next_idx]=="Review":
                 self.currentTask = self.taskSelector.currentText()
                 self.updateLabelFile()
@@ -899,6 +895,8 @@ class CREATE_Challenge_Annotator(QWidget):
                 self.all_bboxes = None
             if "Overall Task" in self.labelFile:
                 self.all_task_labels = [self.labelFile["Overall Task"][i] for i in self.labelFile.index]
+                if len(list(set(self.all_task_labels)))==1:
+                    self.all_task_labels = None
             else:
                 self.all_task_labels = None
 
@@ -913,12 +911,45 @@ class CREATE_Challenge_Annotator(QWidget):
                 self.all_bboxes = None
             if "Overall Task" in self.labelFile:
                 self.all_task_labels = [self.labelFile["Overall Task"][i] for i in self.labelFile.index]
+                if len(list(set(self.all_task_labels)))==1:
+                    self.all_task_labels = None
             else:
                 self.all_task_labels = None
         else:
             self.imageFiles = [x for x in os.listdir(self.imageDirectory) if (".jpg" in x) or (".png" in x)]
             self.all_bboxes = None
             self.all_task_labels = None
+
+        if not self.all_task_labels is None:
+            task_signals = self.taskSelector.blockSignals(True)
+            current_Item_count = self.taskSelector.count()
+            currentTasks = [self.taskSelector.itemText(i) for i in range(current_Item_count)]
+            new_tasks = list(set(self.all_task_labels))
+            for task in new_tasks:
+                if not task in currentTasks:
+                    self.taskSelector.addItem(task)
+            self.taskSelector.blockSignals(task_signals)
+
+        if not self.all_bboxes is None:
+            class_signals = self.classSelector.blockSignals(True)
+            current_Item_count = self.classSelector.count()
+            currentClasses =  [self.classSelector.itemText(i) for i in range(current_Item_count)]
+            new_classes = self.get_bbox_classes()
+            for bbox_class in new_classes:
+                if not bbox_class in currentClasses:
+                    self.classSelector.addItem(bbox_class)
+            self.classSelector.blockSignals(class_signals)
+
+
+    def get_bbox_classes(self):
+        classes = []
+        for bbox_list in self.all_bboxes:
+            bbox_list = eval(str(bbox_list))
+            for bbox in bbox_list:
+                if not bbox["class"] in classes:
+                    classes.append(bbox["class"])
+        return classes
+
 
 
     def addImagesToLabelFile(self):
@@ -994,9 +1025,11 @@ class CREATE_Challenge_Annotator(QWidget):
             if not (self.all_bboxes is None):
                 idx = self.imageFiles.index(fileName)
                 self.imageLabelFile["Bounding boxes"][entry.index[0]] = self.normalizeBBoxes(fileName,self.all_bboxes[idx])
+
             if not self.all_task_labels is None:
                 idx = self.imageFiles.index(fileName)
                 self.imageLabelFile["Task"][entry.index[0]] = self.all_task_labels[idx]
+                self.imageLabelFile["Status"][entry.index[0]] = "Reviewed"
         return "added {} files to annotate".format(len(self.imageFiles))
 
     def setImage(self,fileName=None, reload_image=True):
