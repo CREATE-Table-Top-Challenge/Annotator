@@ -924,7 +924,7 @@ class CREATE_Challenge_Annotator(QWidget):
             task_signals = self.taskSelector.blockSignals(True)
             current_Item_count = self.taskSelector.count()
             currentTasks = [self.taskSelector.itemText(i) for i in range(current_Item_count)]
-            new_tasks = list(set(self.all_task_labels))
+            new_tasks = sorted(list(set(self.all_task_labels)))
             for task in new_tasks:
                 if not task in currentTasks:
                     self.taskSelector.addItem(task)
@@ -948,7 +948,7 @@ class CREATE_Challenge_Annotator(QWidget):
             for bbox in bbox_list:
                 if not bbox["class"] in classes:
                     classes.append(bbox["class"])
-        return classes
+        return sorted(classes)
 
 
 
